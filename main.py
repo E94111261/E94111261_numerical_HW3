@@ -24,7 +24,7 @@ for degree in range(1, 5):
     interp_x_vals = x_values[:degree + 1]
     interp_y_vals = y_values[:degree + 1]
     approx = lagrange_interpolation(interp_x_vals, interp_y_vals, x_target)
-    error_bound = abs(np.cos(x_target) - approx)
+    error_bound = abs(0.7317 - approx)
     print(f"Degree {degree}: Approximation = {approx:.6f}, Error Bound = {error_bound:.6f}")
 
 # Problem 2: Root finding for x = e^(-x) using root_scalar
@@ -37,7 +37,7 @@ print(f"Solution to x - e^(-x) = 0: x ≈ {solution.root:.8f}")
 # Problem 3: Hermite Interpolation for Car Motion
 def hermite_interpolation(t_vals, d_vals, v_vals, t_target):
     """Computes Hermite interpolation and evaluates it at t_target."""
-    hermite_poly = interp.PchipInterpolator(t_vals, d_vals)
+    hermite_poly = interp.CubicHermiteSpline(t_vals, d_vals, v_vals)
     position = hermite_poly(t_target)
     speed = hermite_poly.derivative()(t_target)
     return position, speed
@@ -51,21 +51,14 @@ predicted_position, predicted_speed = hermite_interpolation(T, D, V, t_predictio
 print(f"Predicted position at t = {t_prediction}s: {predicted_position:.2f} ft")
 print(f"Predicted speed at t = {t_prediction}s: {predicted_speed:.2f} ft/s")
 
-# Check if speed exceeds 55 mi/h (≈ 80.67 ft/s)
-def find_exceeding_time(t_vals, d_vals, v_vals, speed_limit=80.67):
-    hermite_poly = interp.PchipInterpolator(t_vals, d_vals)
-    speed_func = hermite_poly.derivative()
-    for t in np.linspace(t_vals[0], t_vals[-1], 100):
-        if speed_func(t) > speed_limit:
-            return t
-    return None
-
-exceed_time = find_exceeding_time(T, D, V)
-if exceed_time:
-    print(f"The car first exceeds 55 mi/h at t ≈ {exceed_time:.2f} s")
-else:
-    print("The car does not exceed 55 mi/h.")
-
 # Maximum speed predicted
-max_speed = max(interp.PchipInterpolator(T, D).derivative()(T))
+max_speed = max(interp.CubicHermiteSpline(T, D, V).derivative()(T))
+
+# Check if speed exceeds 55 mi/h (≈ 80.67 ft/s)
+speed_limit = 80.67
+if max_speed > speed_limit:
+    print("The car exceeded 55 mi/h")
+else:
+    print("The car did not exceed 55 mi/h")
+
 print(f"Predicted maximum speed: {max_speed:.2f} ft/s")
