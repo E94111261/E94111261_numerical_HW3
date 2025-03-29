@@ -1,6 +1,7 @@
 import numpy as np
 import sympy as sp
 import scipy.interpolate as interp
+from scipy.optimize import root_scalar
 
 def lagrange_interpolation(x_vals, y_vals, x):
     """Computes the Lagrange interpolation polynomial and evaluates it at x."""
@@ -26,20 +27,12 @@ for degree in range(1, 5):
     error_bound = abs(np.cos(x_target) - approx)
     print(f"Degree {degree}: Approximation = {approx:.6f}, Error Bound = {error_bound:.6f}")
 
-# Problem 2: Iterated Inverse Interpolation
-def inverse_interpolation(x_vals, y_vals, y_target, iterations=3):
-    """Uses inverse interpolation iteratively to estimate the root."""
-    x_estimate = np.interp(y_target, y_vals, x_vals)
-    for _ in range(iterations):
-        f_interp = interp.BarycentricInterpolator(y_vals, x_vals)
-        x_estimate = f_interp(y_target)
-    return x_estimate
+# Problem 2: Root finding for x = e^(-x) using root_scalar
+def func(x):
+    return x - np.exp(-x)
 
-x_vals_exp = np.array([0.3, 0.4, 0.5, 0.6])
-y_vals_exp = np.exp(-x_vals_exp)
-y_target_exp = 0
-solution = inverse_interpolation(x_vals_exp, y_vals_exp, y_target_exp)
-print(f"Solution to x - e^(-x) = 0: x ≈ {solution:.6f}")
+solution = root_scalar(func, bracket=[0, 1], method='brentq')
+print(f"Solution to x - e^(-x) = 0: x ≈ {solution.root:.8f}")
 
 # Problem 3: Hermite Interpolation for Car Motion
 def hermite_interpolation(t_vals, d_vals, v_vals, t_target):
